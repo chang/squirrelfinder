@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Squirrel Finder</title>
+    <meta charset="UTF-8">
+    <!-- Materialize -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google fonts and icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Spirax" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <!-- MapBox -->
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css" rel="stylesheet" />
+  </head>
+
+  <body>
+
+    <main>
+      <!-- Navbar -->
+      <nav class="green lighten-1">
+        <div class="nav-wrapper">
+          <a href="#" class="brand-logo" id="pagetitle">Squirrel Finder</a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="sass.html">About</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Search -->
+      <div class="section">
+        <div class="row">
+          <div class="container">
+            <div class="input-field col s12">
+              <input type="text" id="squirrel-search" class="autocomplete">
+              <label for="autocomplete-input">Search for a squirrel</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- container -->
+      <div class="row">
+        <div class="container">
+          <a id="button0" class="waves-effect waves-light btn">button</a>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="container">
+        <div id="map" style="width: 1000px; height: 700px;"></div>
+      </div>
+
+    </main>
+
+    <!-- https://www.instagram.com/squirrels_of_iu/ -->
+    <footer class="page-footer blue">
+      <div class="footer-copyright">
+        <div id="footer-message" class="container">
+            Made with <i class="fas fa-heart" id="footer-heart"></i> for 🐿️
+        </div>
+      </div>
+    </footer>
+
+
+    <script src="js/script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+  </body>
+</html>
