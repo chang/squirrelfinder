@@ -1,4 +1,4 @@
-"""Convert latitude and longitude coordinates from DMS to absolute degrees."""
+"""Convert latitude and longitude coordinates."""
 import os
 import json
 from copy import deepcopy
@@ -9,7 +9,7 @@ from geopy.point import Point
 def load_dotenv(path):
     with open(path, 'r') as fp:
         lines = fp.readlines()
-
+    
     env_vars = {}
     for line in lines:
         if "=" not in line:
@@ -51,6 +51,7 @@ def _convert_all(dat):
         elif isinstance(dat[0], list):
             for d in dat:
                 _convert_all(d)
+            
 
 
 def get_root_dir():
@@ -69,9 +70,11 @@ if __name__ == "__main__":
     squirrel_data = json.loads(squirrel_data_str)
 
     converted_squirrel_data = convert_all(squirrel_data)
+    converted_squirrel_data_str = json.dumps(converted_squirrel_data, indent=4)
 
     with open(out_path, 'w') as fp:
-        json.dump(obj=converted_squirrel_data, fp=fp)
+        fp.write(converted_squirrel_data_str)
 
-    print(json.dumps(converted_squirrel_data, indent=4))
+    print(converted_squirrel_data_str)
     print('Converted data written to: {}'.format(out_path))
+    

@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <!-- Materialize -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
     <!-- Google fonts and icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400|Spirax" rel="stylesheet">
@@ -15,58 +13,138 @@
     <!-- MapBox -->
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.js"></script>
     <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.45.0/mapbox-gl.css" rel="stylesheet" />
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
   </head>
 
   <body>
-
-    <main>
-      <!-- Navbar -->
-      <nav class="green lighten-1">
+    <header>
+      <nav class="light-green">
         <div class="nav-wrapper">
-          <a href="#" class="brand-logo" id="pagetitle">Squirrel Finder</a>
+          <a href="#" class="brand-logo" id="page_title">Indiana University Squirrel Finder</a>
           <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="sass.html">About</a></li>
+            <li><a href="https://www.instagram.com/squirrels_of_iu/"><i class="fab fa-instagram fa-lg"></i></a></li>
+            <li><a href="https://twitter.com/squirrels_of_iu?lang=en"><i class="fab fa-twitter fa-lg"></i></a></li>
           </ul>
         </div>
       </nav>
+    </header>
 
-      <!-- Search -->
-      <div class="section">
-        <div class="row">
-          <div class="container">
-            <div class="input-field col s12">
-              <input type="text" id="squirrel-search" class="autocomplete">
-              <label for="autocomplete-input">Search for a squirrel</label>
+    <main>
+      <div id="main" class="row">
+        <div class="col l8 s12">
+          <!-- navigation card -->
+          <div id="map_card" class="card-panel gray z-depth-2">
+            <!-- squirrel selector -->
+            <div class="row">
+              <div class="col s4">
+                <select id="squirrel_select_field" class="icons">
+                  <option value="" disabled selected>Choose a squirrel...</option>
+                  <option value="" data-icon="images/charlotte_1.jpg">Charlotte</option>
+                  <option value="" data-icon="images/sampson_1.jpg">Sampson</option>
+                </select>
+              </div>
+              <div class="col s4">
+                  <a id="btn_test" class="waves-effect waves-light btn">Press me</a>
+              </div>
             </div>
+            <!-- map -->
+            <div id="map"></div>
           </div>
         </div>
-      </div>
 
-      <!-- container -->
-      <div class="row">
-        <div class="container">
-          <a id="button0" class="waves-effect waves-light btn">button</a>
+        <!-- Search and info -->
+        <div id="display_section" class="col l4 s12">
+          <!-- Search -->
+          <!-- <div class="input-field">
+            <input type="text" id="squirrel_search" class="autocomplete">
+            <label for="autocomplete-input">Search for a squirrel</label>
+          </div> -->
+
+          <div id="squirrel_card" class="card scale-transition">
+            <div class="card-image">
+              <img src="images/charlotte_1.jpg">
+              <span class="card-title">Charlotte</span>
+            </div>
+            <div class="card-content">
+              <p>
+                Charlotte is a very nice squirrel. <br>
+                She likes acorns, boy squirrels, and Pink Floyd. <br>
+                Charlotte is the OG of Squirrels of IU. She was the first to approach
+                the club and is kind of a big deal at IU.
+              </p>
+            </div>
+
+
+            <div class="card-tabs">
+              <ul class="tabs tabs-fixed-width">
+                <li class="tab"><a href="#tab_family">Family</a></li>
+                <li class="tab"><a href="#tab_facts" class="active">Facts</a></li>
+                <li class="tab"><a href="#tab_location">Locations</a></li>
+              </ul>
+            </div>
+            <div class="card-content grey lighten-5">
+              <div id="tab_family">
+                <p>
+                  Charlotte has 3 children: Cashew, Acorn, and Walnut.
+                  See them here:
+                </p>
+              </div>
+              <div id="tab_facts">
+                <h5>Did you know...</h5>
+                <ol>
+                  <li>Charlotte once threw a boy squirrel down a tree?</li>
+                  <li>She loves cashews.</li>
+                  <li>Charlotte is an avid reader of Terry Pratchett's Discworld series.</li>
+                </ol>
+              </div>
+              <div id="tab_location">
+                  <p>
+                    Charlotte tends to hang around...
+                  </p>
+                  <div class="section">
+                    <div class="switch">
+                      <label>
+                        <input type="checkbox">
+                        <span class="lever"></span>
+                        Show Territory
+                      </label>
+                    </div>
+                  </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- <a id="scale_demo" href="#!" class="btn-floating btn-large scale-transition">
+            <i class="material-icons">add</i>
+          </a> -->
+
         </div>
-      </div>
 
-      <!-- Map -->
-      <div class="container">
-        <div id="map" style="width: 1000px; height: 700px;"></div>
       </div>
 
     </main>
 
     <!-- https://www.instagram.com/squirrels_of_iu/ -->
-    <footer class="page-footer blue">
-      <div class="footer-copyright">
-        <div id="footer-message" class="container">
-            Made with <i class="fas fa-heart" id="footer-heart"></i> for 🐿️
+    <footer class="page-footer brown lighten-1">
+      <div class="row">
+        <div class="col s12">
+          <span id="footer_message" class="white-text lighten-4">
+            Made with <i class="fas fa-heart" id="footer_heart"></i> for 🐿️ by
+            <a href="http://ericchang.me" class="light-green-text lighten-5">@chang</a>
+            <a id="github_link" href="http://github.com/chang/squirrelfinder"><i class="fab fa-github fa-lg"></i></a>
+          </span>
         </div>
       </div>
     </footer>
 
 
-    <script src="js/script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+    <script src="js/main.js"></script>
+
   </body>
 </html>

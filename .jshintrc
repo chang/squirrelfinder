@@ -1,0 +1,10 @@
+{
+  "browser": true,
+  "esversion": 6,
+  "globals": {"$": false},
+  "globalstrict": true,
+  "quotmark": true,
+  "undef": true,
+  "unused": true,
+  "node": true
+}
