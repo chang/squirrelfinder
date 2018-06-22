@@ -1,22 +1,24 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import {
   Container, Icon, Card,
-  Dropdown, Image, Grid,
-  Divider, Transition, Label,
-  Message, List
+  Image, Grid, Transition, Label,
+  Message, List, Popup, Button,
+  Modal
 } from 'semantic-ui-react';
+
+import { Carousel } from 'react-responsive-carousel';
 
 import './MainMapSection.css';
 import SQUIRRELS from './LoadData.js';
 import SquirrelMap from './SquirrelMap.js';
-import charlotte from '../resources/images/charlotte_1.jpg';
 
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 /* CONSTANTS */
 
 // The duration for fade-in fade-out transitions when changing squirrels.
-const TRANSITION_DURATION = 100;
+const TRANSITION_DURATION = 200;
 
 // The accent color for family member tiles, depending on relation.
 const RELATION_COLORS = {
@@ -25,190 +27,224 @@ const RELATION_COLORS = {
   "Unknown": "white"
 }
 
-// The accent color for each type of card.
-const BASICINFO_ACCENT = "red";
+
+class PhotoCarousel extends React.Component {
+  render() {
+    return (
+      <Carousel showArrows={true} {...this.props}>
+        <div>
+           <img src={SQUIRRELS["Charlotte"]["icon"]}/>
+        </div>
+        <div>
+           <img src={SQUIRRELS["Sampson"]["icon"]}/>
+        </div>
+      </Carousel>
+    );
+
+  }
+}
 
 
+class UnifiedCard extends React.Component {
+  style = {
+    "font-size": "110%"
+  }
 
-const BasicInfoCard = ({ squirrelName }) => {
-  const { description, dob, icon, sex } = SQUIRRELS[squirrelName];
+  render() {
+    const squirrelName = this.props.squirrelName;
+    return (
+      // Might want to set an empty fragment href for a pop effect
+      <Card className="DataDisplay" fluid style={this.style}>
+        {this.renderPhotoCarousel(squirrelName)}
+        {this.renderBasicInfoSection(squirrelName)}
+        {this.renderFamilySection(squirrelName)}
+        {this.renderLikesAndDislikesSection(squirrelName)}
+        {this.renderInterestingFactSection(squirrelName)}
+        {this.renderPhotoModal(squirrelName)}
+      </Card>
+    );
+  }
 
-  let genderIcon = (sex == "male") ? "man" : "woman";
+  renderPhotoCarousel(squirrelName) {
+    return (
+      <PhotoCarousel showThumbs={false}/>
+    );
+  }
 
-  return (
-    <Card fluid>
+  renderModalPhotoCarousel(squirrelName) {
+    return (
+      <PhotoCarousel transition={0}/>
+    );
+  }
+
+  renderIcon(squirrelName) {
+    const { icon } = SQUIRRELS[squirrelName];
+    return (
       <Image src={icon}/>
-      <Card.Content>
+    )
+  }
+
+  // Basic information, right under photo carousel.
+  renderBasicInfoSection(squirrelName) {
+    const { sex, dob, description } = SQUIRRELS[squirrelName];
+    const genderIcon = (sex == "male") ? "man" : "woman";
+    const descriptionStyle = {
+      "font-size": "110%"
+    }
+    return (
+      <Card.Content style={descriptionStyle}>
         <Card.Header content={squirrelName}/>
         <Card.Meta>
           <Icon name={genderIcon}/> {dob}
         </Card.Meta>
         <Card.Description content={description}/>
       </Card.Content>
-    </Card>
-  );
-}
-
-const FamilyCard = ({ squirrelName }) => {
-  function getRelationColor(relation) {
-    return (RELATION_COLORS.hasOwnProperty(relation)) ? RELATION_COLORS[relation] : RELATION_COLORS["Unknown"];
-  }
-
-  const { family } = SQUIRRELS[squirrelName];
-  let numMembers = family.length;
-
-  let labels = family.map(({ name, relation }) => {
-    return (
-      <Label image color={getRelationColor(relation)} as='a' size="large">
-        <img src={SQUIRRELS[name]["icon"]} />
-        {name}
-        <Label.Detail>{relation}</Label.Detail>
-      </Label>
-    )
-  })
-
-  return (
-    <Card fluid className="FamilyCard">
-      <Card.Content header="Family Members"/>
-      <Card.Content>
-        <ul>{labels}</ul>
-      </Card.Content>
-      <Card.Content extra>
-        <a> <Icon name='user'/> {numMembers} Family Members </a>
-      </Card.Content>
-    </Card>
-  )
-}
-
-
-const DidYouKnowCard = ({ squirrelName }) => {
-  let { interestingFact } = SQUIRRELS[squirrelName];
-  return (
-    <Message
-      className="DidYouKnowCard"
-      icon="question circle"
-      header="Did you know..."
-      content={interestingFact}
-      color="olive"
-    />
-  )
-}
-
-
-const LikesAndDislikes = ({ squirrelName }) => {
-  const { likes, dislikes } = SQUIRRELS[squirrelName];
-  const makeItem = (x) => ( <List.Item icon="right triangle" content={x}/> );
-
-  return (
-    <Card fluid>
-      <Card.Content header="Likes"/>
-      <Card.Content>
-        <List animated verticalAlign="left">
-          {likes.map(makeItem)}
-        </List>
-      </Card.Content>
-      <Card.Content header="Dislikes"/>
-      <Card.Content>
-        <List animated verticalAlign="left">
-          {dislikes.map(makeItem)}
-        </List>
-      </Card.Content>
-    </Card>
-  )
-}
-
-
-class SquirrelSelection extends React.Component {
-  render() {
-    let options = [
-      {value: "Charlotte", text: "Charlotte"},
-      {value: "Sampson", text: "Sampson"}
-    ];
-
-    return (
-      <Dropdown
-        fluid
-        onChange={this.props.handleChange}
-        selection
-        placeholder='Select a Squirrel...'
-        options={options}
-        />
     );
   }
 
+  // Family section with labels for each member.
+  renderFamilySection(squirrelName) {
+    const { family } = SQUIRRELS[squirrelName];
+    const numMembers = family.length;
+    const getRelationColor = (relation) => {
+      return (RELATION_COLORS.hasOwnProperty(relation)) ? RELATION_COLORS[relation] : RELATION_COLORS["Unknown"];
+    }
+    const labels = family.map(({ name, relation }) => {
+      return (
+        <Label image color={getRelationColor(relation)} as='a' size="large">
+          <img src={SQUIRRELS[name]["icon"]} />
+          {name}
+          <Label.Detail>{relation}</Label.Detail>
+        </Label>
+      )
+    });
+
+    return (
+      <Card.Content>
+        <Card.Header content="Family"/>
+        <Card.Description content=""/>
+        {labels}
+      </Card.Content>
+    )
+  }
+
+  renderInterestingFactSection(squirrelName) {
+    const { interestingFact } = SQUIRRELS[squirrelName];
+    return (
+      <Card.Content>
+        <Message
+          className="DidYouKnowCard"
+          icon="question circle"
+          header="Fun Fact"
+          content={interestingFact}
+          color="olive"
+        />
+      </Card.Content>
+    )
+  }
+
+  renderLikesAndDislikesSection(squirrelName) {
+    const { likes, dislikes } = SQUIRRELS[squirrelName];
+
+    function createListItem(iconName, color) {
+      const icon = ( <Icon color={color} name={iconName}/> );
+      return function(x) {
+        return (
+          <List.Item
+            icon={icon}
+            content={x}
+          />
+        )
+      }
+    }
+
+    return (
+      <Card.Content>
+        <Card.Header content="Likes and Dislikes"/>
+        <Card.Description content=""/>
+        <Grid columns={2}>
+          <Grid.Column>
+            <List animated relaxed verticalAlign="left">
+              {likes.map(createListItem("checkmark", "green"))}
+            </List>
+          </Grid.Column>
+          <Grid.Column>
+            <List animated relaxed verticalAlign="left">
+              {dislikes.map(createListItem("close", "red"))}
+            </List>
+          </Grid.Column>
+        </Grid>
+      </Card.Content>
+    )
+  }
+
+  renderPhotoModal(squirrelName) {
+    return (
+      <Card.Content extra>
+        <Modal
+          trigger={<Button icon="expand arrows alternate" floated="right"/>}
+          size="large"
+        >
+          <Modal.Header>{squirrelName}</Modal.Header>
+          <Modal.Content>
+            {this.renderModalPhotoCarousel(squirrelName)}
+          </Modal.Content>
+        </Modal>
+      </Card.Content>
+    )
+  }
 }
-
-
-const SquirrelLabel = ({ squirrelName }) => (
-  (squirrelName == null) ? <div></div> : <Label size="large" color="yellow"> {squirrelName} </Label>
-)
 
 
 class MainMapSection extends React.Component {
   state = {
-    squirrelName: null,
     visible: true
   }
 
   constructor(props) {
     super(props);
-    this.handleChange = this.handleChange.bind(this);
+    // this.handleChange = this.handleChange.bind(this);
   }
 
-  setStateWithTransition(stateChange) {
+  toggle() {
     this.setState({visible: false});
     setTimeout(() => {
-      this.setState(stateChange);
       this.setState({visible: true});
     }, TRANSITION_DURATION);
   }
 
-  renderSearchBar(squirrelName) {
-    return (
-      <Grid>
-        <Grid.Column width={4} floated="left">
-          <SquirrelSelection handleChange={this.handleChange}/>
-        </Grid.Column>
-      </Grid>
-    )
-  }
+  // renderSearchBar() {
+  //   return (
+  //     <Grid>
+  //       <Grid.Column width={8} floated="left">
+  //         <SquirrelSelection handleChange={this.handleChange}/>
+  //       </Grid.Column>
+  //     </Grid>
+  //   )
+  // }
 
-  handleChange(e, squirrelSelection) {
-    this.setStateWithTransition({squirrelName: squirrelSelection.value})
-    console.log(squirrelSelection.value);
-  }
+  // changeStateWithTransition(squirrelName) {
+  //   this.setStateWithTransition({squirrelName: squirrelSelection.value})
+  //   console.log(squirrelSelection.value);
+  // }
 
   render() {
-    let squirrelName = (this.state.squirrelName == null) ? "Charlotte" : this.state.squirrelName;
-    return (
-      <Grid padded>
-        {/* Map section */}
-        <Grid.Column width={9}>
-          <Card fluid>
-            <SquirrelMap/>
-          </Card>
-        </Grid.Column>
+    const squirrelName = (this.props.squirrelName == null) ? "Charlotte" : this.props.squirrelName;
 
-        {/* Right side */}
-        <Grid.Column width={7}>
-          {this.renderSearchBar(squirrelName)}
-          <Divider/>
-          {/* Data display */}
-          <Transition visible={this.state.visible} animation="fade" duration={TRANSITION_DURATION}>
-            <div className="DataDisplay">
-              <p></p> {/* This seems buggy: Transition needs an empty text element mixed in to animate the card. */}
-              <Grid columns={2}>
-                <Grid.Column>
-                  <BasicInfoCard squirrelName={squirrelName}/>
-                  <FamilyCard squirrelName={squirrelName}/>
-                </Grid.Column>
-                <Grid.Column>
-                  <LikesAndDislikes squirrelName={squirrelName}/>
-                  <DidYouKnowCard squirrelName={squirrelName}/>
-                </Grid.Column>
-              </Grid>
+    return (
+      <Grid padded relaxed>
+        {/* Data Display */}
+        <Grid.Column width={6}>
+          <Transition visible={this.props.visible} animation="horizontal flip" duration={TRANSITION_DURATION}>
+            <div>
+              <p></p>
+              <UnifiedCard class="DataDisplay" squirrelName={squirrelName}/>
             </div>
           </Transition>
+        </Grid.Column>
+        {/* Map View */}
+        <Grid.Column width={10}>
+          <SquirrelMap/>
         </Grid.Column>
 
       </Grid>
@@ -217,4 +253,4 @@ class MainMapSection extends React.Component {
 }
 
 
-export default MainMapSection
+export default MainMapSection;
