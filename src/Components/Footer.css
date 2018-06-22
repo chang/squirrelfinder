@@ -1,5 +1,6 @@
 .footer {
-    background-color: #BCAAA4;
+    /* semantic UI default brown shade */
+    background-color: rgba(165, 42, 42, 0.7);
     width: 100%;
     padding: 10px;
     text-align: left;

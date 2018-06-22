@@ -1,6 +1,5 @@
 {
     "Sampson": {
-        "icon": "images/sampson_1.jpg",
         "territory": [
             [
                 -86.514,
@@ -71,7 +70,6 @@
         ]
     },
     "Charlotte": {
-        "icon": "images/charlotte_1.jpg",
         "territory": [
             [
                 -86.51844444444444,

@@ -1,73 +1,120 @@
 import React, { Component } from 'react';
 
-import { Button, Icon, Card, Dropdown, Image, Grid, Divider, Transition, Label } from 'semantic-ui-react';
-import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl";
+import {
+  Container, Icon, Card,
+  Dropdown, Image, Grid,
+  Divider, Transition, Label,
+  Message, List
+} from 'semantic-ui-react';
 
+import './MainMapSection.css';
+import SQUIRRELS from './LoadData.js';
+import SquirrelMap from './SquirrelMap.js';
 import charlotte from '../resources/images/charlotte_1.jpg';
-import SQUIRRELS from './DATA.js'
 
 
-const TRANSITION_DURATION = 250;
+/* CONSTANTS */
 
-class SquirrelCard extends React.Component{
-  render() {
-    let squirrel = this.props.squirrelName;
-    let favorite_spot = SQUIRRELS[squirrel]["favorite_spot"];
+// The duration for fade-in fade-out transitions when changing squirrels.
+const TRANSITION_DURATION = 100;
 
-    return (
-      <Card>
-        <Image src={charlotte} />
-        <Card.Content textAlign="left">
-          <Card.Header>{squirrel}</Card.Header>
-          <Card.Meta>
-            <span className='date'>Joined in 2015</span>
-          </Card.Meta>
-          <Card.Description>{squirrel} is a musician living in Nashville.</Card.Description>
-        </Card.Content>
-        <Card.Content extra textAlign="left">
-          <p>Charlotte's favorite spot is: {favorite_spot}</p>
-          <a>
-            <Icon name='user' />
-            22 Friends
-          </a>
-        </Card.Content>
-      </Card>
-    );
+// The accent color for family member tiles, depending on relation.
+const RELATION_COLORS = {
+  "Sister": "yellow",
+  "Brother": "teal",
+  "Unknown": "white"
+}
+
+// The accent color for each type of card.
+const BASICINFO_ACCENT = "red";
+
+
+
+const BasicInfoCard = ({ squirrelName }) => {
+  const { description, dob, icon, sex } = SQUIRRELS[squirrelName];
+
+  let genderIcon = (sex == "male") ? "man" : "woman";
+
+  return (
+    <Card fluid>
+      <Image src={icon}/>
+      <Card.Content>
+        <Card.Header content={squirrelName}/>
+        <Card.Meta>
+          <Icon name={genderIcon}/> {dob}
+        </Card.Meta>
+        <Card.Description content={description}/>
+      </Card.Content>
+    </Card>
+  );
+}
+
+const FamilyCard = ({ squirrelName }) => {
+  function getRelationColor(relation) {
+    return (RELATION_COLORS.hasOwnProperty(relation)) ? RELATION_COLORS[relation] : RELATION_COLORS["Unknown"];
   }
+
+  const { family } = SQUIRRELS[squirrelName];
+  let numMembers = family.length;
+
+  let labels = family.map(({ name, relation }) => {
+    return (
+      <Label image color={getRelationColor(relation)} as='a' size="large">
+        <img src={SQUIRRELS[name]["icon"]} />
+        {name}
+        <Label.Detail>{relation}</Label.Detail>
+      </Label>
+    )
+  })
+
+  return (
+    <Card fluid className="FamilyCard">
+      <Card.Content header="Family Members"/>
+      <Card.Content>
+        <ul>{labels}</ul>
+      </Card.Content>
+      <Card.Content extra>
+        <a> <Icon name='user'/> {numMembers} Family Members </a>
+      </Card.Content>
+    </Card>
+  )
 }
 
 
-const Map = ReactMapboxGl({
-  accessToken: "pk.eyJ1IjoiZXJpY2NoYW5nMDAiLCJhIjoiY2ppbXViZHNxMDgzODN2cGxhNjIza2d1ayJ9.j7pxXt3AOOUk_E-GkLNHEg"
-});
+const DidYouKnowCard = ({ squirrelName }) => {
+  let { interestingFact } = SQUIRRELS[squirrelName];
+  return (
+    <Message
+      className="DidYouKnowCard"
+      icon="question circle"
+      header="Did you know..."
+      content={interestingFact}
+      color="olive"
+    />
+  )
+}
 
 
-class SquirrelMap extends React.Component {
+const LikesAndDislikes = ({ squirrelName }) => {
+  const { likes, dislikes } = SQUIRRELS[squirrelName];
+  const makeItem = (x) => ( <List.Item icon="right triangle" content={x}/> );
 
-  render() {
-    const style = {
-      position: 'absolute',
-      top: 0,
-      bottom: 0,
-      width: '100%'
-    };
-
-    return (
-        <Map
-          style="mapbox://styles/mapbox/streets-v9"
-          containerStyle={{
-            height: "90vh",
-            width: "100%"
-          }}>
-          <Layer
-            type="symbol"
-            id="marker"
-            layout={{ "icon-image": "marker-15" }}>
-            <Feature coordinates={[-0.481747846041145, 51.3233379650232]}/>
-          </Layer>
-        </Map>
-    );
-  }
+  return (
+    <Card fluid>
+      <Card.Content header="Likes"/>
+      <Card.Content>
+        <List animated verticalAlign="left">
+          {likes.map(makeItem)}
+        </List>
+      </Card.Content>
+      <Card.Content header="Dislikes"/>
+      <Card.Content>
+        <List animated verticalAlign="left">
+          {dislikes.map(makeItem)}
+        </List>
+      </Card.Content>
+    </Card>
+  )
 }
 
 
@@ -92,59 +139,10 @@ class SquirrelSelection extends React.Component {
 }
 
 
-class TransitioningSquirrelLabel extends React.Component {
-  // toggle() {
-  //   this.setState({
-  //     visible: !this.state.visible
-  //   });
-  // }
+const SquirrelLabel = ({ squirrelName }) => (
+  (squirrelName == null) ? <div></div> : <Label size="large" color="yellow"> {squirrelName} </Label>
+)
 
-  render() {
-    let visible;
-    if (this.props.squirrelName === null) {
-      visible = false;
-    } else {
-      visible = true;
-    }
-
-    return (
-      <div>
-        <Transition visible={visible} animation="scale" duration={TRANSITION_DURATION}>
-          <Label size="large" color="yellow"> {this.props.squirrelName} </Label>
-        </Transition>
-      </div>
-    )
-  }
-}
-
-
-class SearchBar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      squirrelName: null
-    }
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  handleChange(e, passed) {
-    this.props.onChange(e, passed);
-    this.setState({squirrelName: passed.value});
-  }
-
-  render() {
-    return (
-      <Grid>
-        <Grid.Column width={6} floated="left">
-          <SquirrelSelection handleChange={this.handleChange}/>
-        </Grid.Column>
-        <Grid.Column width={6}>
-          <TransitioningSquirrelLabel squirrelName={this.state.squirrelName}/>
-        </Grid.Column>
-      </Grid>
-    )
-  }
-}
 
 class MainMapSection extends React.Component {
   state = {
@@ -157,38 +155,59 @@ class MainMapSection extends React.Component {
     this.handleChange = this.handleChange.bind(this);
   }
 
+  setStateWithTransition(stateChange) {
+    this.setState({visible: false});
+    setTimeout(() => {
+      this.setState(stateChange);
+      this.setState({visible: true});
+    }, TRANSITION_DURATION);
+  }
+
+  renderSearchBar(squirrelName) {
+    return (
+      <Grid>
+        <Grid.Column width={4} floated="left">
+          <SquirrelSelection handleChange={this.handleChange}/>
+        </Grid.Column>
+      </Grid>
+    )
+  }
+
   handleChange(e, squirrelSelection) {
-    this.setState({squirrelName: squirrelSelection.value})
+    this.setStateWithTransition({squirrelName: squirrelSelection.value})
     console.log(squirrelSelection.value);
   }
 
   render() {
-    let visible;
-    let squirrelName;
-
-    if (this.state.squirrelName === null) {
-      visible = false;
-      squirrelName = "Charlotte";
-    } else {
-      visible = true;
-      squirrelName = this.state.squirrelName;
-    }
-
+    let squirrelName = (this.state.squirrelName == null) ? "Charlotte" : this.state.squirrelName;
     return (
       <Grid padded>
         {/* Map section */}
-        <Grid.Column width={10}>
+        <Grid.Column width={9}>
           <Card fluid>
             <SquirrelMap/>
           </Card>
         </Grid.Column>
 
-        {/* Display */}
-        <Grid.Column width={6}>
-          <SearchBar onChange={this.handleChange}/>
+        {/* Right side */}
+        <Grid.Column width={7}>
+          {this.renderSearchBar(squirrelName)}
           <Divider/>
-          <Transition visible={visible} animation="scale" duration={TRANSITION_DURATION}>
-            <SquirrelCard squirrelName={squirrelName}/>
+          {/* Data display */}
+          <Transition visible={this.state.visible} animation="fade" duration={TRANSITION_DURATION}>
+            <div className="DataDisplay">
+              <p></p> {/* This seems buggy: Transition needs an empty text element mixed in to animate the card. */}
+              <Grid columns={2}>
+                <Grid.Column>
+                  <BasicInfoCard squirrelName={squirrelName}/>
+                  <FamilyCard squirrelName={squirrelName}/>
+                </Grid.Column>
+                <Grid.Column>
+                  <LikesAndDislikes squirrelName={squirrelName}/>
+                  <DidYouKnowCard squirrelName={squirrelName}/>
+                </Grid.Column>
+              </Grid>
+            </div>
           </Transition>
         </Grid.Column>
 
