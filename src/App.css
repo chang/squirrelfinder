@@ -26,3 +26,13 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.Main {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.Footer {
+  flex: 1;
+}
