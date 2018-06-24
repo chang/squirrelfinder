@@ -1,8 +1,6 @@
 #### joe made this: http://goel.io/joe
 .DS_Store
-build*
 *.pyc
-*.jpg
 *.JPG
 *.png
 *.mov

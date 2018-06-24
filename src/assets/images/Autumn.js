@@ -4,6 +4,6 @@ import autumn_0 from "./Autumn/33720285_10204617727040063_633246894335721472_n.j
 import autumn_1 from "./Autumn/33766259_10204617726400047_4944147178974085120_n.jpg"
 
 export default [
-	autumn_0,
 	autumn_1,
+	autumn_0,
 ]

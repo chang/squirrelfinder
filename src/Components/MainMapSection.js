@@ -10,7 +10,7 @@ import {
 import { Carousel } from 'react-responsive-carousel';
 
 import './MainMapSection.css';
-import SQUIRRELS from './LoadData.js';
+import SQUIRRELDATA from './LoadData.js';
 import SquirrelMap from './SquirrelMap.js';
 
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
@@ -50,7 +50,7 @@ function nameToColor(name) {
 
 class PhotoCarousel extends React.Component {
   render() {
-    const imgSources = SQUIRRELS[this.props.squirrelName]["pictures"];
+    const imgSources = SQUIRRELDATA[this.props.squirrelName]["pictures"];
     const images = imgSources.map((img) => {
       return (
         <div>
@@ -101,20 +101,53 @@ class UnifiedCard extends React.Component {
   }
 
   // Basic information, right under photo carousel.
+  // TODO: break this out into more methods
   renderBasicInfoSection(squirrelName) {
-    const { sex, birth_year, personality } = SQUIRRELS[squirrelName];
+    const { sex, birth_year, death_year, personality } = SQUIRRELDATA[squirrelName];
     const genderIcon = (sex == "M") ? "man" : "woman";
     const descriptionStyle = {
       "font-size": "110%"
     }
+
+    // TODO: use consistent camelCase
+    let age;
+    if (death_year == null) {
+      let current_year = (new Date()).getFullYear()
+      age = current_year - birth_year;
+    } else {
+      age = death_year - birth_year;
+    }
+
+    const ageString = "(" + age.toString() + " years old" + ")";
+    const datesString = birth_year.toString() + " - " + ((death_year == null) ? "Present" : death_year.toString());
+
+    let button = (
+      <Button
+        color="green"
+        floated="right"
+        onClick={this.props.handleFindMeClick}
+        squirrel={squirrelName}>
+        Find Me!
+      </Button>
+    );
+
+    if (!SQUIRRELDATA[squirrelName].hasOwnProperty("geo")) {
+      button = (
+        <Popup trigger={button}>
+          <p>I don't have a location yet!</p>
+        </Popup>
+      )
+    }
+
     return (
       <Card.Content style={descriptionStyle}>
         <Card.Header as="h1">
           {squirrelName}
-          <Button color="green" floated="right">Find Me!</Button>
+          {button}
         </Card.Header>
         <Card.Meta>
-          <Icon name={genderIcon}/> {birth_year}
+          <Icon name={genderIcon} color={(sex == "M") ? "blue" : "pink"}/>
+          {datesString + " " + ageString}
         </Card.Meta>
         <Card.Description content={personality}/>
       </Card.Content>
@@ -125,25 +158,29 @@ class UnifiedCard extends React.Component {
   renderFamilySection(squirrelName, handler) {
 
     function makeFamilyLabel({ name, relation }) {
-      let image;
-      if (SQUIRRELS.hasOwnProperty(name)) {
-        image = <img src={SQUIRRELS[name]["icon"]}/>;
-      }
-      else {
-        image = <Icon name="user"/>;
-      }
-
-      return (
+      const hasData = SQUIRRELDATA.hasOwnProperty(name);
+      const image = (hasData) ? (<img src={SQUIRRELDATA[name]["icon"]}/>) : (<Icon name="user"/>);
+      let label = (
         <Label image color={nameToColor(name)} as='a' size="large" onClick={handler}>
           {image}
           {name}
           <Label.Detail>{relation}</Label.Detail>
         </Label>
       )
+
+      if (!hasData) {
+        label = (
+          <Popup trigger={label}>
+            I don't have any data yet!
+          </Popup>
+        )
+      }
+
+      return label;
     }
 
     // const numMembers = family.length;
-    const { family } = SQUIRRELS[squirrelName];
+    const { family } = SQUIRRELDATA[squirrelName];
     let familyLabels = null;
     if (family != null) {
       familyLabels = family.map(makeFamilyLabel)
@@ -159,7 +196,7 @@ class UnifiedCard extends React.Component {
   }
 
   renderTriviaSection(squirrelName) {
-    const { trivia } = SQUIRRELS[squirrelName];
+    const { trivia } = SQUIRRELDATA[squirrelName];
     return (
       <Card.Content>
         <Message
@@ -167,14 +204,14 @@ class UnifiedCard extends React.Component {
           icon="question circle"
           header="Fun Fact"
           content={trivia}
-          color="olive"
+          color="green"
         />
       </Card.Content>
     )
   }
 
   renderLikesAndDislikesSection(squirrelName) {
-    const { likes, dislikes } = SQUIRRELS[squirrelName];
+    const { likes, dislikes } = SQUIRRELDATA[squirrelName];
 
     function createListItem(iconName, color) {
       const icon = ( <Icon color={color} name={iconName}/> );
@@ -230,12 +267,36 @@ class UnifiedCard extends React.Component {
 
 
 class MainMapSection extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    const approximateSquirrelCenter = [-86.519724, 39.168535];
+
+    this.state = {
+      currentMapPosition: approximateSquirrelCenter,
+      currentMapZoom: [15],
+    }
+
+    this.handleFindMeClick = this.handleFindMeClick.bind(this);
+  }
+
+  handleFindMeClick(e, v) {
+    const squirrel = v.squirrel;
+    if (!SQUIRRELDATA[squirrel].hasOwnProperty("geo")) {
+      return;
+    }
+    this.setState({
+      currentMapPosition: SQUIRRELDATA[squirrel]["geo"]["favorite_spot"],
+      currentMapZoom: [18],
+    });
+  }
+
   render() {
     const squirrelName = (this.props.squirrelName == null) ? "Charlotte" : this.props.squirrelName;
 
     return (
       <Grid padded relaxed>
-
         {/* Data Display */}
         <Grid.Column width={6}>
           <Transition visible={this.props.visible} animation="horizontal flip" duration={TRANSITION_DURATION}>
@@ -245,6 +306,7 @@ class MainMapSection extends React.Component {
                 class="DataDisplay"
                 squirrelName={squirrelName}
                 handleLabelClick={this.props.handleLabelClick}
+                handleFindMeClick={this.handleFindMeClick}
               />
             </div>
           </Transition>
@@ -252,7 +314,11 @@ class MainMapSection extends React.Component {
 
         {/* Map View */}
         <Grid.Column width={10}>
-          <SquirrelMap/>
+          <SquirrelMap
+            handlePopupClick={this.props.handlePopupClick}
+            center={this.state.currentMapPosition}
+            zoom={this.state.currentMapZoom}
+          />
         </Grid.Column>
 
       </Grid>

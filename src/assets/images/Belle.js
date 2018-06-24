@@ -5,7 +5,7 @@ import belle_1 from "./Belle/30624465_10204462607282166_123168971875680256_n.jpg
 import belle_2 from "./Belle/30582332_1950980391593566_2698448284728426496_n.png"
 
 export default [
-	belle_0,
 	belle_1,
+	belle_0,
 	belle_2,
 ]

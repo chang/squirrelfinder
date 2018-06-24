@@ -15,6 +15,7 @@ class App extends Component {
     };
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.handleFamilyLabelClick = this.handleFamilyLabelClick.bind(this);
+    this.handlePopupClick = this.handlePopupClick.bind(this);
   }
 
   handleSearchChange(e, v) {
@@ -36,6 +37,10 @@ class App extends Component {
     }
   }
 
+  handlePopupClick(e, v) {
+    this.setStateWithFlipTransition({ currentSquirrel: v.squirrel })
+  }
+
   setStateWithFlipTransition(newState) {
     this.setState({dataCardVisible: false});
     setTimeout(() => {
@@ -51,6 +56,7 @@ class App extends Component {
           <NavBar handleChange={this.handleSearchChange}/>
           <MainMapSection
             handleLabelClick={this.handleFamilyLabelClick}
+            handlePopupClick={this.handlePopupClick}
             visible={this.state.dataCardVisible}
             squirrelName={this.state.currentSquirrel}
           />

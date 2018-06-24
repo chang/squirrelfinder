@@ -9,7 +9,7 @@ from geopy.point import Point
 def load_dotenv(path):
     with open(path, 'r') as fp:
         lines = fp.readlines()
-    
+
     env_vars = {}
     for line in lines:
         if "=" not in line:
@@ -28,7 +28,8 @@ def convert_dms_to_decimal_degrees(coordinate):
     assert len(coordinate) == 2, 'Input should be an iterable with 2 elements'
     p = Point(' '.join(coordinate))
     lat, long, _ = p
-    return [lat, long]
+    # reverse longitude and latitude here since MapBox uses them reversed for some reason
+    return [long, lat]
 
 
 def convert_all(squirrel_data):
@@ -45,13 +46,11 @@ def _convert_all(dat):
     elif isinstance(dat, list):
         is_coordinate = isinstance(dat[0], str) and dat[0].endswith('N') and dat[1].endswith('W')
         if is_coordinate:
-            lat, long = convert_dms_to_decimal_degrees(dat)
-            # reverse longitude and latitude here since MapBox uses them reversed for some reason
-            dat[0], dat[1] = long, lat
+            dat[0], dat[1] = convert_dms_to_decimal_degrees(dat)
         elif isinstance(dat[0], list):
             for d in dat:
                 _convert_all(d)
-            
+
 
 
 def get_root_dir():
@@ -77,4 +76,4 @@ if __name__ == "__main__":
 
     print(converted_squirrel_data_str)
     print('Converted data written to: {}'.format(out_path))
-    
+
