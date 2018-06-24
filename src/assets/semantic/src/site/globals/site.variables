@@ -1,0 +1,9 @@
+/*******************************
+     User Global Variables
+*******************************/
+@fontName: 'Open Sans';
+
+@importGoogleFonts: true;
+@googleFontFamily: 'Open+Sans:400,700';
+@textAlign: "left";
+

@@ -1,9 +1,0 @@
-/*******************************
-     User Global Variables
-*******************************/
-@fontName: 'Roboto';
-
-@importGoogleFonts: true;
-@googleFontFamily: 'Roboto:400,700';
-@textAlign: "left";
-

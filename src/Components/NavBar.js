@@ -11,14 +11,15 @@ class SquirrelSelection extends React.Component {
       options.push({
         value: squirrelName,
         text: squirrelName,
-        image: { avatar: true, src: SQUIRRELS[squirrelName]["icon"] }
+        // image: { avatar: true, src: SQUIRRELS[squirrelName]["icon"] }
       });
     }
 
     return (
       <Dropdown
-        onChange={this.props.handleChange}
+        search
         selection
+        onChange={this.props.handleChange}
         placeholder='Select a Squirrel...'
         options={options}
       />
@@ -58,10 +59,11 @@ class HoverableIconLinkMenuItem extends Component {
         className="Hoverable"
         onMouseEnter={this.handleMouseEnter}
         onMouseLeave={this.handleMouseLeave}
-        href={this.props.href}
         style={{ cursor: "pointer" }}
         >
-        <Icon cursor="pointer" color={this.state.color} name={this.props.name} size="large"></Icon>
+        <a href={this.props.href} target="_blank">
+          <Icon cursor="pointer" color={this.state.color} name={this.props.name} size="large"></Icon>
+        </a>
       </Menu.Item>
     );
   }

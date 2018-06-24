@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
-import MainMapSection from './Components/MainMapSection.js';
-import NavBar from './Components/NavBar.js';
-import Footer from './Components/Footer.js';
+import MainMapSection from './components/MainMapSection.js';
+import NavBar from './components/NavBar.js';
+import Footer from './components/Footer.js';
 
+import squirrelData from './assets/squirrelData.json';
 
 class App extends Component {
   constructor(props) {
@@ -13,22 +14,34 @@ class App extends Component {
       dataCardVisible: true,
     };
     this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.handleFamilyLabelClick = this.handleFamilyLabelClick.bind(this);
   }
 
   handleSearchChange(e, v) {
-    this.setState({
-      currentSquirrel: v.value
-    });
-    console.log(this.state);
-    this.flipDataCard()
+    const newSquirrel = v.value;
+    if (newSquirrel != this.state.currentSquirrel) {
+      this.setStateWithFlipTransition({
+        currentSquirrel: newSquirrel
+      });
+    }
   }
 
-  flipDataCard() {
-    const duration = 250;
+  // Event handler for a label click.
+  handleFamilyLabelClick(e, v) {
+    const clickedSquirrelName = v["children"][1];
+    if (squirrelData.hasOwnProperty(clickedSquirrelName)) {
+      this.setStateWithFlipTransition({
+        currentSquirrel: clickedSquirrelName
+      });
+    }
+  }
+
+  setStateWithFlipTransition(newState) {
     this.setState({dataCardVisible: false});
     setTimeout(() => {
+      this.setState(newState);
       this.setState({dataCardVisible: true});
-    }, duration);
+    }, 100);
   }
 
   render() {
@@ -36,7 +49,11 @@ class App extends Component {
       <div className="App">
         <div className="Main">
           <NavBar handleChange={this.handleSearchChange}/>
-          <MainMapSection visible={this.state.dataCardVisible} squirrelName={this.state.currentSquirrel}/>
+          <MainMapSection
+            handleLabelClick={this.handleFamilyLabelClick}
+            visible={this.state.dataCardVisible}
+            squirrelName={this.state.currentSquirrel}
+          />
         </div>
         <div className="Footer">
           <Footer/>

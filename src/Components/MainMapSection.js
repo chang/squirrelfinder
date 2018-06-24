@@ -16,8 +16,6 @@ import SquirrelMap from './SquirrelMap.js';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 /* CONSTANTS */
-
-// The duration for fade-in fade-out transitions when changing squirrels.
 const TRANSITION_DURATION = 200;
 
 // The accent color for family member tiles, depending on relation.
@@ -27,17 +25,43 @@ const RELATION_COLORS = {
   "Unknown": "white"
 }
 
+const SQUIRREL_COLORS = [
+  "red",
+  "orange",
+  "yellow",
+  "olive",
+  "teal",
+  "blue",
+  "purple",
+  "pink",
+  "brown",
+];
+
+
+// "Hash" a name to a semantic UI coloring
+function nameToColor(name) {
+  let ord = 0;
+  for (let x in name) {
+    ord += x;
+  }
+  return SQUIRREL_COLORS[ord % SQUIRREL_COLORS.length];
+}
+
 
 class PhotoCarousel extends React.Component {
   render() {
+    const imgSources = SQUIRRELS[this.props.squirrelName]["pictures"];
+    const images = imgSources.map((img) => {
+      return (
+        <div>
+          {/* TODO: Maybe set style={{"max-height": "500px"}} */}
+          <Image src={img}/>
+        </div>
+      )
+    });
     return (
-      <Carousel showArrows={true} {...this.props}>
-        <div>
-           <img src={SQUIRRELS["Charlotte"]["icon"]}/>
-        </div>
-        <div>
-           <img src={SQUIRRELS["Sampson"]["icon"]}/>
-        </div>
+      <Carousel showArrows={true} dynamicHeight={true} {...this.props}>
+        {images}
       </Carousel>
     );
 
@@ -55,88 +79,94 @@ class UnifiedCard extends React.Component {
     return (
       // Might want to set an empty fragment href for a pop effect
       <Card className="DataDisplay" fluid style={this.style}>
-        {this.renderPhotoCarousel(squirrelName)}
+        {this.renderCardPhotoCarousel(squirrelName)}
         {this.renderBasicInfoSection(squirrelName)}
-        {this.renderFamilySection(squirrelName)}
+        {this.renderFamilySection(squirrelName, this.props.handleLabelClick)}
         {this.renderLikesAndDislikesSection(squirrelName)}
-        {this.renderInterestingFactSection(squirrelName)}
-        {this.renderPhotoModal(squirrelName)}
+        {this.renderTriviaSection(squirrelName)}
       </Card>
     );
   }
 
-  renderPhotoCarousel(squirrelName) {
+  renderCardPhotoCarousel(squirrelName) {
     return (
-      <PhotoCarousel showThumbs={false}/>
+      <PhotoCarousel squirrelName={squirrelName} showThumbs={false}/>
     );
   }
 
   renderModalPhotoCarousel(squirrelName) {
     return (
-      <PhotoCarousel transition={0}/>
+      <PhotoCarousel squirrelName={squirrelName} transition={0}/>
     );
-  }
-
-  renderIcon(squirrelName) {
-    const { icon } = SQUIRRELS[squirrelName];
-    return (
-      <Image src={icon}/>
-    )
   }
 
   // Basic information, right under photo carousel.
   renderBasicInfoSection(squirrelName) {
-    const { sex, dob, description } = SQUIRRELS[squirrelName];
-    const genderIcon = (sex == "male") ? "man" : "woman";
+    const { sex, birth_year, personality } = SQUIRRELS[squirrelName];
+    const genderIcon = (sex == "M") ? "man" : "woman";
     const descriptionStyle = {
       "font-size": "110%"
     }
     return (
       <Card.Content style={descriptionStyle}>
-        <Card.Header content={squirrelName}/>
+        <Card.Header as="h1">
+          {squirrelName}
+          <Button color="green" floated="right">Find Me!</Button>
+        </Card.Header>
         <Card.Meta>
-          <Icon name={genderIcon}/> {dob}
+          <Icon name={genderIcon}/> {birth_year}
         </Card.Meta>
-        <Card.Description content={description}/>
+        <Card.Description content={personality}/>
       </Card.Content>
     );
   }
 
   // Family section with labels for each member.
-  renderFamilySection(squirrelName) {
-    const { family } = SQUIRRELS[squirrelName];
-    const numMembers = family.length;
-    const getRelationColor = (relation) => {
-      return (RELATION_COLORS.hasOwnProperty(relation)) ? RELATION_COLORS[relation] : RELATION_COLORS["Unknown"];
-    }
-    const labels = family.map(({ name, relation }) => {
+  renderFamilySection(squirrelName, handler) {
+
+    function makeFamilyLabel({ name, relation }) {
+      let image;
+      if (SQUIRRELS.hasOwnProperty(name)) {
+        image = <img src={SQUIRRELS[name]["icon"]}/>;
+      }
+      else {
+        image = <Icon name="user"/>;
+      }
+
       return (
-        <Label image color={getRelationColor(relation)} as='a' size="large">
-          <img src={SQUIRRELS[name]["icon"]} />
+        <Label image color={nameToColor(name)} as='a' size="large" onClick={handler}>
+          {image}
           {name}
           <Label.Detail>{relation}</Label.Detail>
         </Label>
       )
-    });
+    }
+
+    // const numMembers = family.length;
+    const { family } = SQUIRRELS[squirrelName];
+    let familyLabels = null;
+    if (family != null) {
+      familyLabels = family.map(makeFamilyLabel)
+    }
 
     return (
       <Card.Content>
         <Card.Header content="Family"/>
         <Card.Description content=""/>
-        {labels}
+          {familyLabels}
       </Card.Content>
     )
   }
 
-  renderInterestingFactSection(squirrelName) {
-    const { interestingFact } = SQUIRRELS[squirrelName];
+  renderTriviaSection(squirrelName) {
+    const { trivia } = SQUIRRELS[squirrelName];
     return (
       <Card.Content>
         <Message
           className="DidYouKnowCard"
           icon="question circle"
           header="Fun Fact"
-          content={interestingFact}
+          content={trivia}
           color="olive"
         />
       </Card.Content>
@@ -158,6 +188,9 @@ class UnifiedCard extends React.Component {
       }
     }
 
+    let renderedLikes = (likes != null) ? likes.map(createListItem("checkmark", "green")) : null;
+    let renderedDislikes = (dislikes != null) ? dislikes.map(createListItem("close", "red")) : null;
+
     return (
       <Card.Content>
         <Card.Header content="Likes and Dislikes"/>
@@ -165,12 +198,12 @@ class UnifiedCard extends React.Component {
         <Grid columns={2}>
           <Grid.Column>
             <List animated relaxed verticalAlign="left">
-              {likes.map(createListItem("checkmark", "green"))}
+              {renderedLikes}
             </List>
           </Grid.Column>
           <Grid.Column>
             <List animated relaxed verticalAlign="left">
-              {dislikes.map(createListItem("close", "red"))}
+              {renderedDislikes}
             </List>
           </Grid.Column>
         </Grid>
@@ -197,51 +230,26 @@ class UnifiedCard extends React.Component {
 
 
 class MainMapSection extends React.Component {
-  state = {
-    visible: true
-  }
-
-  constructor(props) {
-    super(props);
-    // this.handleChange = this.handleChange.bind(this);
-  }
-
-  toggle() {
-    this.setState({visible: false});
-    setTimeout(() => {
-      this.setState({visible: true});
-    }, TRANSITION_DURATION);
-  }
-
-  // renderSearchBar() {
-  //   return (
-  //     <Grid>
-  //       <Grid.Column width={8} floated="left">
-  //         <SquirrelSelection handleChange={this.handleChange}/>
-  //       </Grid.Column>
-  //     </Grid>
-  //   )
-  // }
-
-  // changeStateWithTransition(squirrelName) {
-  //   this.setStateWithTransition({squirrelName: squirrelSelection.value})
-  //   console.log(squirrelSelection.value);
-  // }
-
   render() {
     const squirrelName = (this.props.squirrelName == null) ? "Charlotte" : this.props.squirrelName;
 
     return (
       <Grid padded relaxed>
+
         {/* Data Display */}
         <Grid.Column width={6}>
           <Transition visible={this.props.visible} animation="horizontal flip" duration={TRANSITION_DURATION}>
             <div>
               <p></p>
-              <UnifiedCard class="DataDisplay" squirrelName={squirrelName}/>
+              <UnifiedCard
+                class="DataDisplay"
+                squirrelName={squirrelName}
+                handleLabelClick={this.props.handleLabelClick}
+              />
             </div>
           </Transition>
         </Grid.Column>
+
         {/* Map View */}
         <Grid.Column width={10}>
           <SquirrelMap/>
